@@ -1,16 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, Req, UseGuards } from '@nestjs/common';
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
+import { UserGuard } from './user.guard';
 
 @Controller('expenses')
 export class ExpensesController {
   constructor(private readonly expensesService: ExpensesService) {}
 
   @Post()
+  @UseGuards(UserGuard)
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  create(@Body() createExpenseDto: CreateExpenseDto) {
-    return this.expensesService.create(createExpenseDto);
+  create(@Req() request,@Body() createExpenseDto: CreateExpenseDto) {
+    const headers = request.headers
+    return this.expensesService.create(Number(headers['user-id']),createExpenseDto);
   }
 
   @Get()

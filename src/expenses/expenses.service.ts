@@ -1,23 +1,28 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ExpensesService {
+  constructor(private readonly usersService: UsersService){}
   private expenses = [
     {
       id: 1,
       category: "entertainment",
       price: 30,
+      userId: 1,
       createdAt: new Date("2024-02-01T10:00:00Z")
     }
   ]
-  create(createExpenseDto: CreateExpenseDto) {
+  create(userId: number, createExpenseDto: CreateExpenseDto) {
+    const user = this.usersService.findOne(userId)
     const lastId = this.expenses[this.expenses.length-1]?.id || 0;
 
     const newExpense = {
       ...createExpenseDto,
       id: lastId+1,
+      userId: userId,
       createdAt: new Date(),
     }
     this.expenses.push(newExpense);
