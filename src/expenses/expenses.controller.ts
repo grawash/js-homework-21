@@ -13,7 +13,7 @@ export class ExpensesController {
   @UsePipes(new ValidationPipe({ whitelist: true }))
   create(@Req() request,@Body() createExpenseDto: CreateExpenseDto) {
     const headers = request.headers
-    return this.expensesService.create(Number(headers['user-id']),createExpenseDto);
+    return this.expensesService.create(headers['user-id'],createExpenseDto);
   }
 
   @Get()
@@ -23,7 +23,7 @@ export class ExpensesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.expensesService.findOne(+id);
+    return this.expensesService.findOne(id);
   }
 
   @Patch(':id')

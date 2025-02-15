@@ -1,40 +1,45 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { UsersService } from 'src/users/users.service';
+import { Expense } from './shcema/expense.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { isValidObjectId, Model } from 'mongoose';
 
 @Injectable()
 export class ExpensesService {
-  constructor(private readonly usersService: UsersService){}
+  constructor(private readonly usersService: UsersService, @InjectModel(Expense.name) private expenseModel: Model<Expense>){}
+  
   private expenses = [
     {
       id: 1,
       category: "entertainment",
       price: 30,
-      userId: 1,
+      user: 'a',
       createdAt: new Date("2024-02-01T10:00:00Z")
     }
   ]
-  create(userId: number, createExpenseDto: CreateExpenseDto) {
-    const user = this.usersService.findOne(userId)
-    const lastId = this.expenses[this.expenses.length-1]?.id || 0;
-
+  async create(userId: string, createExpenseDto: CreateExpenseDto) {
+    const user = await this.usersService.findOne(userId)
+    if(Object.keys(user).length < 1) throw new HttpException("user does not exist", HttpStatus.NOT_FOUND)
+    console.log(user.id)
     const newExpense = {
       ...createExpenseDto,
-      id: lastId+1,
-      userId: userId,
+      user: user.id,
       createdAt: new Date(),
     }
-    this.expenses.push(newExpense);
+    const expense = this.expenseModel.create(newExpense);
     return newExpense;
   }
 
-  findAll() {
-    return this.expenses;
+  async findAll() {
+    const expenses = this.expenseModel.find()
+    return expenses;
   }
 
-  findOne(id: number) {
-    const expense = this.expenses.find((exp) => exp.id === id);
+  findOne(id: string) {
+    if (!isValidObjectId(id)) throw new BadRequestException("invalid id provided")
+    const expense = this.expenseModel.findById(id).populate('user');
     if(!expense){
       throw new HttpException('expense not found', HttpStatus.NOT_FOUND)
     }

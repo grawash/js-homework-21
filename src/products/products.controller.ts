@@ -19,7 +19,7 @@ export class ProductsController {
   @Get()
   @UseGuards(SubscriptionGuard, IsViewer)
   findAll(@Req() request) {
-    const userId: number = Number(request.headers['user-id']);
+    const userId: string = request.headers['user-id'];
     return this.productsService.findAll(userId);
   }
 

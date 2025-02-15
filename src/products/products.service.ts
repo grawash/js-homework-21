@@ -34,13 +34,13 @@ export class ProductsService {
     return newProduct;
   }
 
-  findAll(userId: number) {
+  findAll(userId: string) {
     const user = this.usersService.findOne(userId)
     const now = new Date();
-    const diffInDays = (now.getTime() - user.subscriptionDate.getTime())/ (1000 * 60 * 60 * 24)
-    if(diffInDays < 30){
-      return this.products;
-    }
+    // const diffInDays = (now.getTime() - user.subscriptionDate.getTime())/ (1000 * 60 * 60 * 24)
+    // if(diffInDays < 30){
+    //   return this.products;
+    // }
     return this.products.filter(el => el.discounted === true)
   }
 
